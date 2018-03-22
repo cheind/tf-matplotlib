@@ -1,14 +1,37 @@
 import tensorflow as tf
 import numpy as np
 from functools import wraps
+import matplotlib.pyplot as plt
 
 def figure_buffer(fig):
     '''Extract raw image buffer from matplotlib figure shaped as 1xHxWx3.'''  
     fig.canvas.draw()  
     buf = fig.canvas.tostring_rgb()
     w, h = fig.canvas.get_width_height()
-    return np.fromstring(buf, dtype=np.uint8).reshape((1, h, w, 3))
+    return np.fromstring(buf, dtype=np.uint8).reshape((h, w, 3))
 
+def figure_tensor(name):
+    def decorator(func):        
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            gen = lambda *func_args, **unused : figure_buffer(func(*func_args, **kwargs))
+            return tf.py_func(gen, args, tf.uint8, name=name, **tf_pyfunc_kwargs)
+        return wrapper
+    return decorator
+
+"""
+def figure_summary(name, **tf_image_kwargs):
+    print('here')
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            image_tensor = func(*args, **kwargs)        
+            return tf.summary.image(name, image_tensor, **tf_image_kwargs)
+
+        return wrapper
+    return decorator
+"""
+"""
 def figure_summary(name, *tf_image_args, **tf_image_kwargs):
     '''Transforms functions returning matplotlib figures into tf.summary.images.
 
@@ -52,4 +75,4 @@ def figure_summary(name, *tf_image_args, **tf_image_kwargs):
             return tf.summary.image(name, image_tensor, *tf_image_args, **tf_image_kwargs)
         return wrapper
     return decorator
-
+"""
