@@ -3,6 +3,8 @@ import numpy as np
 from functools import wraps
 import matplotlib.pyplot as plt
 
+from tfmpl.decorator import vararg_decorator
+
 def figure_buffer(fig):
     '''Extract raw image buffer from matplotlib figure shaped as 1xHxWx3.'''  
     fig.canvas.draw()  
@@ -10,14 +12,24 @@ def figure_buffer(fig):
     w, h = fig.canvas.get_width_height()
     return np.fromstring(buf, dtype=np.uint8).reshape((h, w, 3))
 
-def figure_tensor(name):
-    def decorator(func):        
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            gen = lambda *func_args, **unused : figure_buffer(func(*func_args, **kwargs))
-            return tf.py_func(gen, args, tf.uint8, name=name, **tf_pyfunc_kwargs)
-        return wrapper
-    return decorator
+
+@vararg_decorator
+def figure_tensor(func, **tf_pyfunc_kwargs):
+    name = tf_pyfunc_kwargs.pop('name', func.__name__)
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        gen = lambda *func_args, **unused_kwargs : figure_buffer(func(*func_args, **kwargs))
+        return tf.py_func(gen, args, tf.uint8, name=name, **tf_pyfunc_kwargs)
+    return wrapper
+
+@vararg_decorator
+def figure_summary(func, name, **tf_image_kwargs):
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):        
+        image_tensor = tf.expand_dims(figure_tensor(func)(*args, **kwargs), 0)
+        return tf.summary.image(name, image_tensor, **tf_image_kwargs)
+    return wrapper
 
 """
 def figure_summary(name, **tf_image_kwargs):
