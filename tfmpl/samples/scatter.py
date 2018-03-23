@@ -9,13 +9,16 @@ if __name__ == '__main__':
     with tf.Session(graph=tf.Graph()) as sess:
         
         @tfmpl.figure_summary(name='x')
-        def draw_scatter(scaled, color='b'):     
-            fig = tfmpl.create_figure(figsize=(4,4))
-            ax = fig.add_subplot(111)
-            ax.axis('off')
-            ax.scatter(scaled[:, 0], scaled[:, 1], c=color)
-            fig.tight_layout()
-            return fig  
+        def draw_scatter(scaled, colors):     
+            figs = tfmpl.create_figures(len(colors), figsize=(4,4))
+
+            for idx, f in enumerate(figs):
+                ax = f.add_subplot(111)
+                ax.axis('off')
+                ax.scatter(scaled[:, 0], scaled[:, 1], c=colors[idx])
+                f.tight_layout()
+
+            return figs  
 
         points = tf.constant(
             np.random.normal(loc=0.0, scale=1.0, size=(100, 2)).astype(np.float32)
@@ -29,7 +32,7 @@ if __name__ == '__main__':
         #plt.imshow(imgdata)        
         #plt.show()
 
-        image_summary = draw_scatter(scaled)
+        image_summary = draw_scatter(scaled, colors=['r', 'b'])
         print(image_summary)
         all_summaries = tf.summary.merge_all()
 

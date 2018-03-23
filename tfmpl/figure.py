@@ -1,33 +1,40 @@
 import tensorflow as tf
 import numpy as np
 from functools import wraps
+from collections import Sequence
 import matplotlib.pyplot as plt
 
 from tfmpl.decorator import vararg_decorator
 
 def figure_buffer(fig):
     '''Extract raw image buffer from matplotlib figure shaped as 1xHxWx3.'''  
-    fig.canvas.draw()  
-    buf = fig.canvas.tostring_rgb()
-    w, h = fig.canvas.get_width_height()
-    return np.fromstring(buf, dtype=np.uint8).reshape((h, w, 3))
+    if not isinstance(fig, Sequence):
+        fig = [fig]
 
+    buffers = []
+    w, h = fig[0].canvas.get_width_height()
+    for f in fig:
+        f.canvas.draw()
+        wf, hf = f.canvas.get_width_height()
+        assert wf == w and hf == h, 'All canvas objects need to have same size'
+        buffers.append(np.fromstring(f.canvas.tostring_rgb(), dtype=np.uint8).reshape(h, w, 3))
+
+    return np.stack(buffers) # NxHxWx3
 
 @vararg_decorator
 def figure_tensor(func, **tf_pyfunc_kwargs):
     name = tf_pyfunc_kwargs.pop('name', func.__name__)
     @wraps(func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args, **kwargs):        
         gen = lambda *func_args, **unused_kwargs : figure_buffer(func(*func_args, **kwargs))
         return tf.py_func(gen, args, tf.uint8, name=name, **tf_pyfunc_kwargs)
     return wrapper
 
 @vararg_decorator
 def figure_summary(func, name, **tf_image_kwargs):
-
     @wraps(func)
     def wrapper(*args, **kwargs):        
-        image_tensor = tf.expand_dims(figure_tensor(func)(*args, **kwargs), 0)
+        image_tensor = figure_tensor(func)(*args, **kwargs)
         return tf.summary.image(name, image_tensor, **tf_image_kwargs)
     return wrapper
 
