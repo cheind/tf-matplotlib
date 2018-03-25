@@ -3,6 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.colors import LogNorm
+from datetime import datetime
+now = datetime.now()
 import tfmpl
 import os
 
@@ -19,10 +21,12 @@ if __name__ == '__main__':
             
             fig = None
             ax = None
-            x, y, z = [], [], []
+            ln = None
+            xyzs = [[], [], []]
 
             def init_fig(xy):
-                nonlocal fig, ax
+                print('in init')
+                nonlocal fig, ax, ln
                 fig = tfmpl.create_figure()
                 ax = fig.add_subplot(111, projection='3d', elev=50, azim=-50)
 
@@ -31,94 +35,43 @@ if __name__ == '__main__':
                 ax.plot_surface(xx, yy, zz, norm=LogNorm(), rstride=1, cstride=1, edgecolor='none', alpha=.8, cmap=plt.cm.jet)
                 ax.plot([3], [.5], [beale(3, .5)], 'k*', markersize=10)
 
+                ln, = ax.plot([],[],[] ,animated=True)
+
                 return fig, None
                 
             @tfmpl.blittable_figure_tensor(init_func=init_fig)
             def draw(xy):
-                pass
+                xyzs[0].append(xy[0, 0])
+                xyzs[1].append(xy[0, 1])
+                xyzs[2].append(beale(xy[0, 0], xy[0, 1]))
 
-            print(draw)
+                ln.set_data(xyzs[0], xyzs[1])
+                ln.set_3d_properties(xyzs[2])
+                return ln,
+
             return draw
-
-        """
-        @tfmpl.figure_summary(name='sgd')
-        def draw(x, y):   
-            fig = tfmpl.create_figure()
-            ax = fig.add_subplot(111, projection='3d', elev=50, azim=-50)
-
-            xx, yy = np.meshgrid(np.linspace(-4.5, 4.5, 40), np.linspace(-4.5, 4.5, 40))
-            zz = beale(xx, yy)
-            ax.plot_surface(xx, yy, zz, norm=LogNorm(), rstride=1, cstride=1, edgecolor='none', alpha=.8, cmap=plt.cm.jet)
-            ax.plot([3], [.5], [beale(3, .5)], 'k*', markersize=10)
-
-            #ax.plot(x, y, beale(x,y), 'o')
-
-            return fig
-        """
         
-        xy = tf.get_variable('xy', [2, 2], tf.float32, tf.constant_initializer(3))
+        xy = tf.get_variable('xy', [1, 2], tf.float32, tf.constant_initializer([[3, 4.]]))
         z = beale(xy[:, 0], xy[:, 1])
 
-        opt = tf.train.GradientDescentOptimizer(1e-6)
-        train = opt.minimize(z[0])
+        opt = tf.train.AdagradOptimizer(1e-2)        
+        grads_and_vars = opt.compute_gradients(z[0], [xy])
+        clipped_grads_and_vars = [(tf.clip_by_value(g, -10, 10), v) for g, v in grads_and_vars]
+        train = opt.apply_gradients(clipped_grads_and_vars)
 
         image_tensor = create_drawer()(xy)
         image_summary = tf.summary.image('sgd', image_tensor)        
         all_summaries = tf.summary.merge_all()
 
         os.makedirs('log', exist_ok=True)
-        writer = tf.summary.FileWriter('./log', sess.graph)
+        logdir = "log/" + now.strftime("%Y%m%d-%H%M%S") + "/"
+        writer = tf.summary.FileWriter(logdir, sess.graph)
 
         init = tf.global_variables_initializer()
         sess.run(init)
-        for i in range(100):  
-            summary, _ = sess.run([all_summaries, train])
-            #summary, _ = sess.run([image_tensor, train])
-            writer.add_summary(summary, global_step=i)
-
-        
-        """
-        scale = tf.placeholder(tf.float32)        
-        scaled = points*scale
-
-        #img = draw_scatter(scaled, color='b')
-        #imgdata = sess.run(img, feed_dict={scale: 2.})
-        #plt.imshow(imgdata)        
-        #plt.show()
-
-        image_summary = cached_draw(scaled)
-        print(image_summary)
-        all_summaries = tf.summary.merge_all()
-
-        os.makedirs('log', exist_ok=True)
-        writer = tf.summary.FileWriter('./log', sess.graph)
-
-        for i in range(10):
-            summary = sess.run(all_summaries, feed_dict={scale: 2.})
-            writer.add_summary(summary, global_step=i)
-
-
-
-    
-
-    xmin, xmax, xstep = -4.5, 4.5, .2
-    ymin, ymax, ystep = -4.5, 4.5, .2
-
-    x, y = np.meshgrid(np.arange(xmin, xmax + xstep, xstep), np.arange(ymin, ymax + ystep, ystep))
-    z = beale(x, y)
-
-    fig = plt.figure(figsize=(8, 5))
-    ax = plt.axes(projection='3d', elev=50, azim=-50)
-
-    ax.plot_surface(x, y, z, norm=LogNorm(), rstride=1, cstride=1, edgecolor='none', alpha=.8, cmap=plt.cm.jet)
-    ax.plot([3], [.5], [beale(3, .5)], 'k*', markersize=10)
-
-    ax.set_xlabel('$x$')
-    ax.set_ylabel('$y$')
-    ax.set_zlabel('$z$')
-
-    ax.set_xlim((xmin, xmax))
-    ax.set_ylim((ymin, ymax))
-
-    plt.show()
-    """
+        for i in range(2000):              
+            if i % 25 == 0:
+                summary = sess.run(all_summaries)
+                writer.add_summary(summary, global_step=i)
+                writer.flush()
+            sess.run(train)
