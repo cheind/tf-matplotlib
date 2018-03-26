@@ -14,11 +14,10 @@ pip install tfmpl
 
 ## Build Status
 
-|Branch|Status|
-|------|------|
-|Linux/master|![](https://travis-ci.org/cheind/tf-matplotlib.svg?branch=master)|
-|Linux/develop|![](https://travis-ci.org/cheind/tf-matplotlib.svg?branch=master)|
-|Windows|![](https://ci.appveyor.com/api/projects/status/reo8nucumqhb93q5?svg=true)
+|Branch|Linux|Windows|
+|------|------|------|
+|master|![](https://travis-ci.org/cheind/tf-matplotlib.svg?branch=master)| ![](https://ci.appveyor.com/api/projects/status/reo8nucumqhb93q5/branch/master?svg=true) |
+|develop|![](https://travis-ci.org/cheind/tf-matplotlib.svg?branch=master)|![](https://ci.appveyor.com/api/projects/status/reo8nucumqhb93q5/branch/develop?svg=true)|
 
 ### Usage
 
