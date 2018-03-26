@@ -22,12 +22,6 @@ def figure_tensor(func, **tf_pyfunc_kwargs):
 
     @wraps(func)
     def wrapper(*func_args, **func_kwargs):
-
-        # Args might be a mix of tensors and non-tensors.
-        # We split them here and pass all tensorflow tensors
-        # as inputs to py_func. This ensures that those
-        # tensors will get evaluated before draw() is called
-        # and tensor values will be provided.
         tf_args = PositionalTensorArgs(func_args)
         
         def pyfnc_callee(*tensor_values, **unused):
