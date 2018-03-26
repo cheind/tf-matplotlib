@@ -1,4 +1,5 @@
 import tensorflow as tf
+import traceback
 import numpy as np
 from functools import wraps
 
@@ -25,10 +26,16 @@ def figure_tensor(func, **tf_pyfunc_kwargs):
         tf_args = PositionalTensorArgs(func_args)
         
         def pyfnc_callee(*tensor_values, **unused):
-            figs = as_list(func(*tf_args.mix_args(tensor_values), **func_kwargs))
-            for f in figs:
-                f.canvas.draw()
-            return figure_buffer(figs)
+            try:
+                figs = as_list(func(*tf_args.mix_args(tensor_values), **func_kwargs))
+                for f in figs:
+                    f.canvas.draw()
+                return figure_buffer(figs)
+            except Exception:
+                print('-'*5 + 'tfmpl catched exception' + '-'*5)
+                print(traceback.format_exc())                
+                print('-'*20)
+                raise
 
         return tf.py_func(pyfnc_callee, tf_args.tensor_args, tf.uint8, name=name, **tf_pyfunc_kwargs)
     return wrapper
@@ -46,28 +53,36 @@ def blittable_figure_tensor(func, init_func, **tf_pyfunc_kwargs):
         tf_args = PositionalTensorArgs(func_args)
 
         def pyfnc_callee(*tensor_values, **unused):
-            pos_args = tf_args.mix_args(tensor_values)
-            nonlocal figs, bgs
-            if figs is None and init_func:
-                figs, artists = init_func(*pos_args, **func_kwargs)
-                figs = as_list(figs)
-                artists = as_list(artists)
-                for f in figs:
-                    f.canvas.draw()
+            
+            try:
+                nonlocal figs, bgs
+                pos_args = tf_args.mix_args(tensor_values)
+                
+                if figs is None and init_func:
+                    figs, artists = init_func(*pos_args, **func_kwargs)
+                    figs = as_list(figs)
+                    artists = as_list(artists)
+                    for f in figs:
+                        f.canvas.draw()
+                    for a in artists:
+                        a.set_animated(True)
+                    bgs = [f.canvas.copy_from_bbox(f.bbox) for f in figs]                
+
+                artists = as_list(func(*pos_args, **func_kwargs))
+
+                for f, bg in zip(figs, bgs):
+                    f.canvas.restore_region(bg)                
                 for a in artists:
-                    a.set_animated(True)
-                bgs = [f.canvas.copy_from_bbox(f.bbox) for f in figs]                
+                    a.axes.draw_artist(a)
+                for f in figs:
+                    f.canvas.blit(f.bbox)
 
-            artists = as_list(func(*pos_args, **func_kwargs))
-
-            for f, bg in zip(figs, bgs):
-                f.canvas.restore_region(bg)                
-            for a in artists:
-                a.axes.draw_artist(a)
-            for f in figs:
-                f.canvas.blit(f.bbox)
-
-            return figure_buffer(figs)
+                return figure_buffer(figs)
+            except Exception:
+                print('-'*5 + 'tfmpl catched exception' + '-'*5)
+                print(traceback.format_exc())                
+                print('-'*20)
+                raise
 
         return tf.py_func(pyfnc_callee, tf_args.tensor_args, tf.uint8, name=name, **tf_pyfunc_kwargs)
     return wrapper
