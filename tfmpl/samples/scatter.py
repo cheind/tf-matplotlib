@@ -26,7 +26,7 @@ if __name__ == '__main__':
         scaled = points*scale
        
         image_tensor = draw_scatter(scaled, ['r', 'g'])
-        image_summary = tf.summary.image('image', image_tensor)       
+        image_summary = tf.summary.image('scatter', image_tensor)       
         all_summaries = tf.summary.merge_all()
 
         os.makedirs('log', exist_ok=True)

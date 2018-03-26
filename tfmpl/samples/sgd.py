@@ -1,6 +1,7 @@
 from mpl_toolkits.mplot3d.art3d import Line3DCollection
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.colors import LogNorm
+from matplotlib import cm
 from datetime import datetime
 import tensorflow as tf
 import numpy as np
@@ -20,10 +21,9 @@ if __name__ == '__main__':
         # List of optimizers to compare
         optimizers = [
             (tf.train.GradientDescentOptimizer(1e-3), 'SGD'),
-            (tf.train.AdagradOptimizer(1e0), 'Adagrad'),
+            (tf.train.AdagradOptimizer(1e-1), 'Adagrad'),
             (tf.train.AdadeltaOptimizer(1e2), 'Adadelta'),
-            (tf.train.AdamOptimizer(1e-1), 'Adam'),
-            (tf.train.MomentumOptimizer(1e-3, 0.1), 'Momentum'),
+            (tf.train.AdamOptimizer(1e-1), 'Adam'),            
         ]
 
         paths = []        
@@ -33,10 +33,17 @@ if __name__ == '__main__':
             '''Initialize figures.'''
             fig = tfmpl.create_figure(figsize=(8,6))
             ax = fig.add_subplot(111, projection='3d', elev=50, azim=-30)
+            ax.w_xaxis.set_pane_color((1.0,1.0,1.0,1.0))
+            ax.w_yaxis.set_pane_color((1.0,1.0,1.0,1.0))
+            ax.w_zaxis.set_pane_color((1.0,1.0,1.0,1.0))
+            ax.set_title('Gradient descent on Beale surface')
+            ax.set_xlabel('$x$')
+            ax.set_ylabel('$y$')
+            ax.set_zlabel('beale($x$,$y$)')
         
             xx, yy = np.meshgrid(np.linspace(-4.5, 4.5, 40), np.linspace(-4.5, 4.5, 40))
             zz = beale(xx, yy)
-            ax.plot_surface(xx, yy, zz, norm=LogNorm(), rstride=1, cstride=1, edgecolor='none', alpha=.8, cmap=plt.cm.jet)
+            ax.plot_surface(xx, yy, zz, norm=LogNorm(), rstride=1, cstride=1, edgecolor='none', alpha=.8, cmap=cm.jet)
             ax.plot([3], [.5], [beale(3, .5)], 'k*', markersize=5)
             
             for o in optimizers:
@@ -52,7 +59,6 @@ if __name__ == '__main__':
         def draw(xy, z):
             '''Updates paths for each optimizer.'''
             history.append(np.c_[xy, z])
-
             xyz = np.stack(history) #NxMx3
             for idx, path in enumerate(paths):
                 path.set_data(xyz[:, idx, 0], xyz[:, idx, 1])
@@ -61,8 +67,8 @@ if __name__ == '__main__':
             return paths
 
         # Create variables for each optimizer
-        start = tf.constant_initializer([3., 4.], tf.float32)
-        xys = [tf.get_variable(f'xy_{o[1]}', 2, tf.float32, initializer=start) for o in optimizers]
+        start = tf.constant_initializer([3., 4.], dtype=tf.float32)
+        xys = [tf.get_variable(f'xy_{o[1]}', 2, tf.float32, initializer=start) for o in optimizers]        
         zs = [beale(xy[0], xy[1]) for xy in xys]
 
         # Define optimization target
@@ -87,7 +93,7 @@ if __name__ == '__main__':
         init = tf.global_variables_initializer()
         sess.run(init)
         for i in range(200):              
-            if i % 25 == 0:
+            if i % 10 == 0:
                 summary = sess.run(all_summaries)
                 writer.add_summary(summary, global_step=i)
                 writer.flush()
