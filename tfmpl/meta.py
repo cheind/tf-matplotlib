@@ -5,6 +5,7 @@ from collections import Sequence
 
 
 def vararg_decorator(f):
+    '''Decorator to handle variable argument decorators.'''
 
     @wraps(f)
     def decorator(*args, **kwargs):
@@ -16,6 +17,8 @@ def vararg_decorator(f):
     return decorator
 
 class PositionalTensorArgs:
+    '''Handle tensor arguments.'''
+
     def __init__(self, args):
         self.args = args
         self.tf_args = [(i,a) for i,a in enumerate(args) if is_tensor(a)]
@@ -31,6 +34,8 @@ class PositionalTensorArgs:
         return args
 
 def as_list(x):
+    '''Ensure `x` is of list type.'''
+    
     if x is None:
         x = []
     elif not isinstance(x, Sequence):
