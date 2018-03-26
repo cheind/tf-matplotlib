@@ -58,7 +58,7 @@ def blittable_figure_tensor(func, init_func, **tf_pyfunc_kwargs):
                 nonlocal figs, bgs
                 pos_args = tf_args.mix_args(tensor_values)
                 
-                if figs is None and init_func:
+                if figs is None:
                     figs, artists = init_func(*pos_args, **func_kwargs)
                     figs = as_list(figs)
                     artists = as_list(artists)
