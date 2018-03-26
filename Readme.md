@@ -14,7 +14,7 @@ pip install tfmpl
 
 ### Usage
 
-Here's how to render a simple scatter plot. See [scatter.py](tfmpl/samples/scatter.py) for a self contained example.
+Below are the relevant snippets to render a simple scatter plot. See [scatter.py](tfmpl/samples/scatter.py) for the complete self-contained example.
 
 ```python
 import tensorflow as tf
