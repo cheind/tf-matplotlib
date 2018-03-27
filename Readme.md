@@ -74,6 +74,12 @@ with tf.Session(graph=tf.Graph()) as sess:
 
 ![](etc/scatter.png)
 
+### Draw utilities
+
+When doing classification, a common task is to generate a confusion matrix. **tf-matplotlib** provides `tfmpl.draw.confusion_matrix` to quickly generate such a plot from labels and predictions. The following plot shows classification training progress on the MNIST classification task. Full sample code is provided in [mnist.py](tfmpl/samples/mnist.py).
+
+![](etc/cm.gif)
+
 ### License
 
 ```
