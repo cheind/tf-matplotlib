@@ -1,3 +1,8 @@
+# Copyright 2018 Christoph Heindl.
+#
+# Licensed under MIT License
+# ============================================================
+
 from datetime import datetime
 import tensorflow as tf
 import numpy as np
@@ -26,7 +31,7 @@ if __name__ == '__main__':
         scaled = points*scale
        
         image_tensor = draw_scatter(scaled, ['r', 'g'])
-        image_summary = tf.summary.image('scatter', image_tensor)       
+        image_summary = tf.summary.image('scatter', image_tensor)
         all_summaries = tf.summary.merge_all()
 
         os.makedirs('log', exist_ok=True)

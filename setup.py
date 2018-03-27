@@ -1,3 +1,8 @@
+# Copyright 2018 Christoph Heindl.
+#
+# Licensed under MIT License
+# ============================================================
+
 import os
 try:
     from setuptools import setup
@@ -15,7 +20,7 @@ setup(
     url='https://github.com/cheind/tf-matplotlib',
     license='MIT',
     install_requires=required,
-    packages=['tfmpl', 'tfmpl.samples'],
+    packages=['tfmpl', 'tfmpl.samples', 'tfmpl.tests'],
     include_package_data=True,
     keywords='tensorflow matplotlib tensorboard'
 )
