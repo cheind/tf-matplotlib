@@ -56,9 +56,9 @@ def confusion_matrix(ax, labels, predictions, num_classes, axis_labels=None, nor
         if cm[i,j] == 0:
             txt = '.'
         elif normalize:            
-            txt = f'{cm[i,j]:.2f}'        
+            txt = '{:.2f}'.format(cm[i,j])
         else:
-            txt = f'{cm[i,j]}'
+            txt = '{}'.format(cm[i,j])
         ax.text(j, i, txt, horizontalalignment="center", verticalalignment='center', color= "black", fontsize=7)
 
     np.set_printoptions(**po)
