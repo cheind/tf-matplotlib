@@ -22,7 +22,7 @@ def confusion_matrix(ax, labels, predictions, num_classes, axis_labels=None, nor
 
     cm = np.zeros((num_classes, num_classes), dtype=np.int32)
     for i in range(len(labels)):
-        cm[labels[i]][predictions[i]] += 1
+        cm[labels[i], predictions[i]] += 1
 
     if normalize:
         with np.errstate(invalid='ignore', divide='ignore'):
