@@ -1,3 +1,8 @@
+# Copyright 2018 Christoph Heindl.
+#
+# Licensed under MIT License
+# ============================================================
+
 import os
 try:
     from setuptools import setup

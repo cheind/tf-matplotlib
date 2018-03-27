@@ -1,3 +1,8 @@
+# Copyright 2018 Christoph Heindl.
+#
+# Licensed under MIT License
+# ============================================================
+
 from mpl_toolkits.mplot3d.art3d import Line3DCollection
 from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.colors import LogNorm

@@ -1,3 +1,8 @@
+# Copyright 2018 Christoph Heindl.
+#
+# Licensed under MIT License
+# ============================================================
+
 import tensorflow as tf
 import traceback
 import numpy as np

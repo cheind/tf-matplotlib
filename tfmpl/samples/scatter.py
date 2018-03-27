@@ -1,3 +1,8 @@
+# Copyright 2018 Christoph Heindl.
+#
+# Licensed under MIT License
+# ============================================================
+
 from datetime import datetime
 import tensorflow as tf
 import numpy as np

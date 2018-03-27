@@ -1,8 +1,12 @@
+# Copyright 2018 Christoph Heindl.
+#
+# Licensed under MIT License
+# ============================================================
+
 from functools import wraps
 import tensorflow as tf
 from tensorflow.contrib.framework import is_tensor
 from collections import Sequence
-
 
 def vararg_decorator(f):
     '''Decorator to handle variable argument decorators.'''
