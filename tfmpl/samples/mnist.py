@@ -6,6 +6,10 @@
 
 Using a simple MNIST classifier taken from
 https://github.com/tensorflow/tensorflow/blob/r1.1/tensorflow/examples/tutorials/mnist/mnist_softmax.py
+
+Code is modified to slow down convergence so that
+time-stepping confusion matrix in Tensorboard has a
+better visual effect.
 """
 
 from tensorflow.examples.tutorials.mnist import input_data
@@ -17,20 +21,20 @@ import os
 import tfmpl
 
 @tfmpl.figure_tensor
-def draw_confusion_matrix(labels, predictions):
+def draw_confusion_matrix(matrix):
     '''Draw confusion matrix for MNIST.'''
     fig = tfmpl.create_figure(figsize=(7,7))
     ax = fig.add_subplot(111)
     ax.set_title('Confusion matrix for MNIST classification')
     
-    tfmpl.draw.confusion_matrix(
-        ax, 
-        labels, predictions, 
-        10, axis_labels=['Digit ' + str(x) for x in range(10)], 
-        normalize=True)
+    tfmpl.plots.confusion_matrix.draw(
+        ax, matrix,
+        axis_labels=['Digit ' + str(x) for x in range(10)],
+        normalize=True
+    )
 
     return fig
-
+    
 if __name__ == '__main__':    
     mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
 
@@ -51,7 +55,12 @@ if __name__ == '__main__':
         preds = tf.argmax(y, 1)
         labels = tf.argmax(y_, 1)
 
-        image_tensor = draw_confusion_matrix(preds, labels)
+        # Compute confusion matrix
+        matrix = tf.confusion_matrix(labels, preds, num_classes=10)
+
+        # Get a image tensor for summary usage
+        image_tensor = draw_confusion_matrix(matrix)
+
         image_summary = tf.summary.image('confusion_matrix', image_tensor)
         all_summaries = tf.summary.merge_all()
 
@@ -67,6 +76,7 @@ if __name__ == '__main__':
             sess.run(train, feed_dict={x: batch_xs, y_: batch_ys})
 
             if i % 10 == 0:
+                print(f'Iteration {i}')
                 summary = sess.run(all_summaries, feed_dict={x: mnist.test.images, y_: mnist.test.labels})
                 writer.add_summary(summary, global_step=i)
                 writer.flush()
