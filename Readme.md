@@ -1,8 +1,8 @@
 ### **tf-matplotlib** - seamless integration of matplotlib figures into TensorFlow summaries
 
-**tf-matplotlib** allows your everyday matplotlib figures to be rendered inside TensorFlow's Tensorboard visualization interface. **tf-matplotlib** 
+**tf-matplotlib** renders your everyday matplotlib figures tinside TensorFlow's Tensorboard visualization interface. The library
  - takes care of evaluating input tensors prior to plotting, 
- - avoids matplotlib threading issues
+ - avoids matplotlib threading issues,
  - support multiple figures and,
  - provides blitting for runtime critical plotting. 
  
