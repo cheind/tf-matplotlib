@@ -21,21 +21,20 @@ import os
 import tfmpl
 
 @tfmpl.figure_tensor
-def draw_confusion_matrix(labels, predictions):
+def draw_confusion_matrix(matrix):
     '''Draw confusion matrix for MNIST.'''
     fig = tfmpl.create_figure(figsize=(7,7))
     ax = fig.add_subplot(111)
     ax.set_title('Confusion matrix for MNIST classification')
     
-    cm = tfmpl.plots.confusion_matrix.from_labels_and_predictions(labels, predictions, 10)
     tfmpl.plots.confusion_matrix.draw(
-        ax, cm,
+        ax, matrix,
         axis_labels=['Digit ' + str(x) for x in range(10)],
         normalize=True
     )
 
     return fig
-
+    
 if __name__ == '__main__':    
     mnist = input_data.read_data_sets("MNIST_data/", one_hot=True)
 
@@ -56,7 +55,12 @@ if __name__ == '__main__':
         preds = tf.argmax(y, 1)
         labels = tf.argmax(y_, 1)
 
-        image_tensor = draw_confusion_matrix(preds, labels)
+        # Compute confusion matrix
+        matrix = tf.confusion_matrix(labels, preds, num_classes=10)
+
+        # Get a image tensor for summary usage
+        image_tensor = draw_confusion_matrix(matrix)
+
         image_summary = tf.summary.image('confusion_matrix', image_tensor)
         all_summaries = tf.summary.merge_all()
 
