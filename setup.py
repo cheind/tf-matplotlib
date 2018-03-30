@@ -20,7 +20,7 @@ setup(
     url='https://github.com/cheind/tf-matplotlib',
     license='MIT',
     install_requires=required,
-    packages=['tfmpl', 'tfmpl.samples', 'tfmpl.tests'],
+    packages=['tfmpl', 'tfmpl.plots', 'tfmpl.samples', 'tfmpl.tests'],
     include_package_data=True,
     keywords='tensorflow matplotlib tensorboard'
 )
