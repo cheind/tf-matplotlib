@@ -6,6 +6,10 @@
 
 Using a simple MNIST classifier taken from
 https://github.com/tensorflow/tensorflow/blob/r1.1/tensorflow/examples/tutorials/mnist/mnist_softmax.py
+
+Code is modified to slow down convergence so that
+time-stepping confusion matrix in Tensorboard has a
+better visual effect.
 """
 
 from tensorflow.examples.tutorials.mnist import input_data
@@ -23,11 +27,12 @@ def draw_confusion_matrix(labels, predictions):
     ax = fig.add_subplot(111)
     ax.set_title('Confusion matrix for MNIST classification')
     
-    tfmpl.draw.confusion_matrix(
-        ax, 
-        labels, predictions, 
-        10, axis_labels=['Digit ' + str(x) for x in range(10)], 
-        normalize=True)
+    cm = tfmpl.plots.confusion_matrix.from_labels_and_predictions(labels, predictions, 10)
+    tfmpl.plots.confusion_matrix.draw(
+        ax, cm,
+        axis_labels=['Digit ' + str(x) for x in range(10)],
+        normalize=True
+    )
 
     return fig
 
@@ -67,6 +72,7 @@ if __name__ == '__main__':
             sess.run(train, feed_dict={x: batch_xs, y_: batch_ys})
 
             if i % 10 == 0:
+                print(f'Iteration {i}')
                 summary = sess.run(all_summaries, feed_dict={x: mnist.test.images, y_: mnist.test.labels})
                 writer.add_summary(summary, global_step=i)
                 writer.flush()
