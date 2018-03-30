@@ -8,4 +8,4 @@ from tfmpl.create import create_figure, create_figures
 import tfmpl.plots
 
 # Needs to be last line
-__version__ = '1.0.1'
+__version__ = '1.0.2'
