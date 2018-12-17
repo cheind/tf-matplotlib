@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
         def beale(x, y):
             '''Beale surface for optimization tests.'''
-            with tf.name_scope('beale', [x, y]):
+            with tf.name_scope('beale', values=[x, y]):
                 return (1.5 - x + x*y)**2 + (2.25 - x + x*y**2)**2 + (2.625 - x + x*y**3)**2
 
         # List of optimizers to compare
